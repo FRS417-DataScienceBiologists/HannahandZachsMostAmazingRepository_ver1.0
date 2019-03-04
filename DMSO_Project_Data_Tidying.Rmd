@@ -1,0 +1,111 @@
+---
+title: "DMSO_Project_Data_Tidying"
+author: "Hannah Houts"
+date: "March 1, 2019"
+output: html_document
+---
+
+Load Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+Load Data & Rename Columns 
+```{r}
+Untidy_DMSO_Data <- readr::read_csv("UntidyFYSDataSet.csv")
+
+
+Untidy_DMSO_Data <- Untidy_DMSO_Data %>%
+  rename(
+          "Chemical_Name" = ChemicalName,
+          "Mean_Intensity_Control" = mean.Control.PBS,
+          "Mean_Intensity_02" = mean.0.2.mg.kg.DMSO,
+          "Mean_Intensity_20" = mean.2.0.mg.kg.DMSO,
+          "Mean_Intensity_40" = mean.4.0.mg.kg.DMSO,
+          "Fold_Change_02" = FC_lowvsCTRL,
+          "Fold_Change_20" = FC_medvsCTRL,
+          "Fold_Change_40" = FC_highvsCTRL,
+          "p_val_02" = post.hoc.Control.PBS.0.2.mg.kg.DMSO,
+          "p_val_20" = post.hoc.Control.PBS.2.0.mg.kg.DMSO,
+          "p_val_40" = post.hoc.Control.PBS.4.0.mg.kg.DMSO
+          )
+Original_DMSO_Data <- Untidy_DMSO_Data
+```
+
+
+
+
+
+
+Gather Intensities and make data frame with only intensities
+```{r}
+          
+Intensity_DMSO_Data<- Untidy_DMSO_Data %>% 
+   #Gathers 4 columns 
+   gather(Mean_Intensity_Control, 
+         Mean_Intensity_02, 
+         Mean_Intensity_20, 
+         Mean_Intensity_40, 
+         key="Treatment", value="Mean_Intensity")%>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Intensity_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Mean_Intensity)
+
+```
+
+
+Gather Fold Changes and make data frame with only Fold Changes
+```{r}
+          
+Fold_Change_DMSO_Data <- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(Fold_Change_02, 
+           Fold_Change_20,
+           Fold_Change_40,
+          key="Treatment", value="Fold_Change_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Change_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Fold_Change_vs_Control)
+
+```
+
+Gather P-values and make data frame with only P-Values
+```{r}
+          
+p_value_DMSO_Data<- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(p_val_02, 
+          p_val_20, 
+          p_val_40,
+          key="Treatment", value="p_value_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_val_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, p_value_vs_Control)
+
+```
+
+
+  
+  
+Join!: join treatment and Fold Change, and p_val
+```{r}
+
+Tidy_DMSO_Data <- left_join(Intensity_DMSO_Data, Fold_Change_DMSO_Data)
+            
+Tidy_DMSO_Data <- left_join(Tidy_DMSO_Data, p_value_DMSO_Data)
+
+
+```
