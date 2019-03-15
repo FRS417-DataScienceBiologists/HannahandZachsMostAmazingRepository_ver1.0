@@ -8,13 +8,8 @@ output:
     incremental: true
 #    css: styles.css
 
-#autosize: true
+autosize: true
 ---
-
-
-
-
-
 
 # Description of the Experiment
 
@@ -48,13 +43,14 @@ options(scipen = 999)
 ```{r}
 Untidy_DMSO_Data
 ```
-## How we "#Tidy"d the data
+
+## How we #Tidyd the data
 Oof, those column names have to go
 ```{r}
 colnames(Untidy_DMSO_Data)
 ```
 
-## How we "#Tidy"d the data
+## How we #Tidyd the data
 ```{r}
 Untidy_DMSO_Data <- Untidy_DMSO_Data %>%
   rename(
@@ -72,14 +68,14 @@ Untidy_DMSO_Data <- Untidy_DMSO_Data %>%
           )
 ```
 
-## How we "#Tidy"d the data
+## How we #Tidyd the data
 Much Better!
 ```{r}
 colnames(Untidy_DMSO_Data)
 ```
 Now we need to Gather some columns
 
-## How we "#Tidy"d the data
+## How we #Tidyd the data
 
 We gathered intensities and made a data frame with <b> only </b> intensities
 ```{r, results='hide'}
@@ -100,7 +96,7 @@ Intensity_DMSO_Data<- Untidy_DMSO_Data %>%
    select(Region, ID, Chemical_Name, Treatment, Mean_Intensity)
 ```
 
-## How we "#Tidy"d the data
+## How we #Tidyd the data
 
 We gathered fold changes and made a data frame with <b> only </b> fold changes
 ```{r, results='hide'}
@@ -119,3 +115,286 @@ Fold_Change_DMSO_Data<- Untidy_DMSO_Data %>%
  # selects 3 "key" columns, treatment, and intensity
  select(Region, ID, Chemical_Name, Treatment, Fold_Change_vs_Control)
 ```
+
+## How we #Tidyd the data
+
+We gathered p-values and made a data frame with <b> only </b> p-values
+```{r, results='hide'}
+p_value_DMSO_Data<- Untidy_DMSO_Data %>% 
+ #Gathers 3 columns 
+ gather(p_val_02, 
+        p_val_20, 
+        p_val_40,
+        key="Treatment", value="p_value_vs_Control") %>% 
+  
+ #deletes part of unwanted text in data
+ separate(Treatment, 
+            into= c("Delete", "Treatment"), 
+            sep = "_val_") %>%   
+ # selects 3 "key" columns, treatment, and intensity
+ select(Region, ID, Chemical_Name, Treatment, p_value_vs_Control)
+
+```
+## How we #Tidyd the data
+
+So Each Table looks something like this, but we need to join all of the tables by the key : Chemical Name, ID, and Region
+```{r}
+p_value_DMSO_Data
+```
+
+
+## How we #Tidyd the data
+
+So Each Table looks something like this, but we need to join all of the tables by the key : Chemical Name, ID, and Region
+Join!: join treatment and Fold Change, and p_val
+```{r, results='hide'}
+Tidy_DMSO_Data <- left_join(Intensity_DMSO_Data, Fold_Change_DMSO_Data)
+            
+Tidy_DMSO_Data <- left_join(Tidy_DMSO_Data, p_value_DMSO_Data)
+```
+
+## How we #Tidyd the data
+
+So Each Table looks something like this, but we need to join all of the tables by the key : Chemical Name, ID, and Region
+Join!: join treatment and Fold Change, and p_val
+```{r}
+head(Tidy_DMSO_Data)
+```
+
+
+# Subsets of the Data
+
+
+## Subsets of the Data
+-Our data set was very large, so we took subsets of the data
+
+## Subsets of the Data
+
+```{r}
+Chems_in_OneCMetabolism <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "S-Lactoylglutathione" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-")
+Chems_in_OneCMetabolism
+```
+
+
+## Subsets of the Data
+
+```{r}
+Chems_in_Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Chems_in_Nucleotides
+```
+
+
+## Subsets of the Data
+This is just metabolites with significant p-values and fold changes.
+Significant p-val is 0.05, significant fold change = 2
+
+```{r}
+DMSO_Data_Sig_Foldchange_AND_pval <- Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control, 
+         p_value_vs_Control, 
+         Mean_Intensity, 
+         Treatment) %>% 
+  filter(Fold_Change_vs_Control >= 2.0 & p_value_vs_Control <= 0.05)
+```
+
+
+## Visualization
+```{r echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+DMSO_Data_Sig_Foldchange_AND_pval%>% 
+  ggplot(aes(x= Region, fill=Region))+
+  geom_bar()+
+  theme_dark()+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  labs(title = "Number of Significant Metabolites by Region ",
+       x = "Region of Brain",
+       y = "Number of Metabolites")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_fill_brewer(palette = "PuRd")
+```
+
+## Visualization
+```{r echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+DMSO_Data_Sig_Foldchange_AND_pval%>% 
+  ggplot(aes(x= Region, fill=Region))+
+  geom_bar()+
+  theme_dark()+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  labs(title = "Number of Significant Metabolites by Region ",
+       x = "Region of Brain",
+       y = "Number of Metabolites")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_fill_brewer(palette = "PuRd")
+```
+
+
+## Visualization
+
+Looking at the relationship between SAM and SAH is a common indicator on where the equalibrium lays and is idiciative of the activity of the metabolomic pathway
+```{r echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+Chems_in_OneCMetabolism %>%
+    filter(Chemical_Name== "S-Adenosyl-homocysteine" |
+           Chemical_Name== "S-Adenosyl-methionine") %>% 
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+    facet_grid(~Chemical_Name)
+```
+
+## Visualization
+
+Looking at the relationship between SAM and SAH is a common indicator on where the equalibrium lays and is idiciative of the activity of the metabolomic pathway
+```{r echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+Chems_in_OneCMetabolism %>%
+    filter(Chemical_Name== "S-Adenosyl-homocysteine" |
+           Chemical_Name== "S-Adenosyl-methionine") %>% 
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+    facet_grid(~Chemical_Name)
+```
+
+## Visualization
+```{r echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+Chems_in_OneCMetabolism %>%
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-") %>% 
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+    facet_wrap(~Chemical_Name)+
+    theme(axis.text.x = element_text(angle = 60, hjust=1),
+    plot.title = element_text(hjust = 0.5))+
+    labs(title = "Mean Intensity of Metabolite Signal ",
+        x = "Treatment", 
+        y = "Mean Intensity")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Visualization
+
+```{r echo=TRUE}
+Chems_in_OneCMetabolism %>% 
+  ggplot(aes(x=Treatment, y=Chemical_Name))+
+  theme_classic(base_family = "Avenir")+
+  geom_tile(aes(fill= Mean_Intensity), color="grey")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in One Carbon Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## Visualization
+```{r echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+Chems_in_OneCMetabolism %>% 
+  ggplot(aes(x=Treatment, y=Chemical_Name))+
+  theme_classic(base_family = "Avenir")+
+  geom_tile(aes(fill= Mean_Intensity), color="grey")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in One Carbon Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+##Visualization
+```{r echo=TRUE}
+Chems_in_Nucleotides %>% 
+ggplot(aes(x=Treatment, y=Chemical_Name))+
+  geom_tile(aes(fill=Mean_Intensity), color="white")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 60, hjust=1), 
+        plot.title = element_text(hjust = 0.5))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in Nucleotide Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+scale_fill_gradientn(colours = terrain.colors(19))
+```
+
+##Visualization
+```{r echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+Chems_in_Nucleotides %>% 
+ggplot(aes(x=Treatment, y=Chemical_Name))+
+  geom_tile(aes(fill=Mean_Intensity), color="white")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 60, hjust=1), 
+        plot.title = element_text(hjust = 0.5))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in Nucleotide Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+scale_fill_gradientn(colours = terrain.colors(19))
+```
+
+# Thank you!

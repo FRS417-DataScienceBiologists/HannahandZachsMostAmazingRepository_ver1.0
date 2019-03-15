@@ -1,3 +1,29 @@
+---
+title: "Exploration of Metabolite Levels Across the Brains of Rats Treated with Varriable Doses of DMSO"
+author: Zach Rabow and Hannah Houts
+date: March 15, 2019
+output: ioslides_presentation
+---
+
+# In the morning
+
+## Getting up
+
+- Turn off alarm
+- Get out of bed
+
+## Breakfast
+
+- Eat eggs
+- Drink coffee
+
+# In the evening
+
+## Dinner
+
+
+
+
 Exploration of Metabolite Levels Across the Brains of Rats Treated with Varriable Doses of DMSO
 ========================================================
 author: Zach Rabow & Hannah Houts
