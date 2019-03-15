@@ -75,43 +75,6 @@ OneCMetabolism %>%
   geom_tile(aes(fill=Mean_Intensity), color="white")
 ```
 
-```{r}
-Nucleotides <- 
-  Tidy_DMSO_Data %>% 
-  filter(Chemical_Name== "5-Methylcytidine" |
-        Chemical_Name== "5-Methylcytosine" |
-        Chemical_Name== "7-Methylguanine" |
-        Chemical_Name== "7-Methylguanosine" |
-        Chemical_Name== "Adenine" |
-        Chemical_Name== "Adenosine" |
-        Chemical_Name== "Adenosine-3-monophosphate" |
-        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
-        Chemical_Name== "Guanine" |
-        Chemical_Name== "Guanosine" |
-        Chemical_Name== "Guanosine-5-tetraphosphate" |
-        Chemical_Name== "Cytidine" |
-        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
-        Chemical_Name== "METHYLGUANIDINE" |
-        Chemical_Name== "2-Methylguanosine" |
-        Chemical_Name== "Nicotinamide-riboside-cation" |
-        Chemical_Name== "Thymine" |
-        Chemical_Name== "UMP" |
-        Chemical_Name== "3-Methylcytidine" |
-        Chemical_Name== "2-Deoxycytidine" |
-        Chemical_Name== "2-O-Methylcytidine" |
-        Chemical_Name== "3-O-Methylcytidine" |
-        Chemical_Name== "Uracil" |
-        Chemical_Name== "Uridine" |
-        Chemical_Name== "1-Methyladenosine" |
-        Chemical_Name== "Xanthine" |
-        Chemical_Name== "Xanthosine-5-monophosphate" |
-        Chemical_Name== "Inosine" |
-        Chemical_Name== "Inosine-5-monophosphate" |
-        Chemical_Name== "5-Methylthioadenosine" |
-        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
-        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
-Nucleotides
-```
 
 ```{r} 
 Chems_in_Nucleotides %>% 
@@ -128,11 +91,36 @@ OneCMetabolism %>%
   facet_wrap(~Region)
 ```
 
+
+
+## These Plots is lit yo
+
 ```{r}
-Tidy_DMSO_Data %>% 
-  ggplot(aes(x=Mean_Intensity, y=Fold_Change_vs_Control, color=Region))+
-  scale_x_log10()+
-  geom_point()
+Chems_in_Nucleotides%>% 
+  filter(p_value_vs_Control < 0.005)%>%
+  ggplot(aes(x=Chemical_Name, y=p_value_vs_Control, fill=Treatment))+
+   scale_y_log10()+
+  rotate_x_text(45)+
+ geom_col(position = "dodge") +
+  facet_wrap(~Region)
+```
+
+
+```{r}
+Chems_in_OneCMetabolism %>%
+  arrange()
+#    filter(country == "China" | country == "India") %>%
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+facet_grid(~Chemical_Name)+
+  
+    theme(axis.text.x = element_text(angle = 60, hjust=1))
 
 ```
+
+
+
 
