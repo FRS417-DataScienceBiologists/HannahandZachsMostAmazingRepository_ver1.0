@@ -138,7 +138,7 @@ Chems_in_OneCMetabolism <-
         Chemical_Name== "S-Lactoylglutathione" |
         Chemical_Name== "Glutathione-oxidized" |
         Chemical_Name== "Glutathione-reduceD-")
-OneCMetabolism
+Chems_in_OneCMetabolism
 ```
 
 ```{r}
