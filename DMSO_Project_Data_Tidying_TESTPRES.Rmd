@@ -1,0 +1,185 @@
+---
+title: "DMSO_Project_Data_Tidying"
+author: "Hannah Houts"
+date: "March 1, 2019"
+output: ioslides_presentation
+autosize: true
+---
+
+Load Libraries
+===================================================
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+
+
+
+Load Data & Rename Columns 
+=====================================================
+```{r}
+Untidy_DMSO_Data <- readr::read_csv("UntidyFYSDataSet.csv")
+
+
+Untidy_DMSO_Data <- Untidy_DMSO_Data %>%
+  rename(
+          "Chemical_Name" = ChemicalName,
+          "Mean_Intensity_Control" = mean.Control.PBS,
+          "Mean_Intensity_02" = mean.0.2.mg.kg.DMSO,
+          "Mean_Intensity_20" = mean.2.0.mg.kg.DMSO,
+          "Mean_Intensity_40" = mean.4.0.mg.kg.DMSO,
+          "Fold_Change_02" = FC_lowvsCTRL,
+          "Fold_Change_20" = FC_medvsCTRL,
+          "Fold_Change_40" = FC_highvsCTRL,
+          "p_val_02" = post.hoc.Control.PBS.0.2.mg.kg.DMSO,
+          "p_val_20" = post.hoc.Control.PBS.2.0.mg.kg.DMSO,
+          "p_val_40" = post.hoc.Control.PBS.4.0.mg.kg.DMSO
+          )
+Original_DMSO_Data <- Untidy_DMSO_Data
+```
+
+
+
+
+
+Gather Intensities and make data frame with only intensities
+==========================================================================
+```{r}
+          
+Intensity_DMSO_Data<- Untidy_DMSO_Data %>% 
+   #Gathers 4 columns 
+   gather(Mean_Intensity_Control, 
+         Mean_Intensity_02, 
+         Mean_Intensity_20, 
+         Mean_Intensity_40, 
+         key="Treatment", value="Mean_Intensity")%>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Intensity_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Mean_Intensity)
+
+```
+
+
+
+
+
+Gather Fold Changes and make data frame with only Fold Changes
+```{r}
+          
+Fold_Change_DMSO_Data <- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(Fold_Change_02, 
+           Fold_Change_20,
+           Fold_Change_40,
+          key="Treatment", value="Fold_Change_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Change_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Fold_Change_vs_Control)
+
+```
+
+
+
+
+
+Gather P-values and make data frame with only P-Values
+```{r}
+          
+p_value_DMSO_Data<- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(p_val_02, 
+          p_val_20, 
+          p_val_40,
+          key="Treatment", value="p_value_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_val_") %>%   
+
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, p_value_vs_Control)
+
+```
+
+
+  
+
+  
+Join!: join treatment and Fold Change, and p_val
+```{r}
+
+Tidy_DMSO_Data <- left_join(Intensity_DMSO_Data, Fold_Change_DMSO_Data)
+            
+Tidy_DMSO_Data <- left_join(Tidy_DMSO_Data, p_value_DMSO_Data)
+
+
+```
+
+
+
+
+
+Subsets:
+
+```{r}
+Chems_in_OneCMetabolism <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "S-Lactoylglutathione" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-")
+OneCMetabolism
+```
+
+```{r}
+Chems_in_Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Chems_in_Nucleotides
+```
+
+
+
