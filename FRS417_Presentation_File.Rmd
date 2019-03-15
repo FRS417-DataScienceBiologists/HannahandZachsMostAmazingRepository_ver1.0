@@ -13,7 +13,7 @@ autosize: true
 
 # Description of the Experiment
 
- - This is a description of the study, and how rats got injected with solvents. its a whole thing
+ Rats were treated at 4 different doses of DMSO, and 4 sections of their brains were sampled and run on LC Mass Spec for metabolite content
 
 #Data Tidying
 ## Description of the Data 
