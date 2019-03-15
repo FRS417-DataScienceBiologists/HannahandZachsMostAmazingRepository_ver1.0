@@ -1,0 +1,336 @@
+---
+title: "Project"
+author: "Zachary Rabow"
+date: "2/28/2019"
+output: html_document
+---
+Load Libraries
+```{r}
+library("tidyverse")
+library("ggplot2")
+library("ggthemr")
+library("devtools")
+library("RColorBrewer")
+```
+
+```{r}
+options(scipen = 999)
+```
+
+Load Data & Rename Columns 
+```{r}
+Untidy_DMSO_Data <- readr::read_csv("UntidyFYSDataSet.csv")
+Untidy_DMSO_Data <- Untidy_DMSO_Data %>%
+  rename(
+          "Chemical_Name" = ChemicalName,
+          "Mean_Intensity_Control" = mean.Control.PBS,
+          "Mean_Intensity_02" = mean.0.2.mg.kg.DMSO,
+          "Mean_Intensity_20" = mean.2.0.mg.kg.DMSO,
+          "Mean_Intensity_40" = mean.4.0.mg.kg.DMSO,
+          "Fold_Change_02" = FC_lowvsCTRL,
+          "Fold_Change_20" = FC_medvsCTRL,
+          "Fold_Change_40" = FC_highvsCTRL,
+          "p_val_02" = post.hoc.Control.PBS.0.2.mg.kg.DMSO,
+          "p_val_20" = post.hoc.Control.PBS.2.0.mg.kg.DMSO,
+          "p_val_40" = post.hoc.Control.PBS.4.0.mg.kg.DMSO
+          )
+Original_DMSO_Data <- Untidy_DMSO_Data
+```
+
+Gather Intensities and make data frame with only intensities
+```{r}
+Intensity_DMSO_Data<- Untidy_DMSO_Data %>% 
+   #Gathers 4 columns 
+   gather(Mean_Intensity_Control, 
+         Mean_Intensity_02, 
+         Mean_Intensity_20, 
+         Mean_Intensity_40, 
+         key="Treatment", value="Mean_Intensity")%>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Intensity_") %>%   
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Mean_Intensity)
+```
+
+Gather Fold Changes and make data frame with only Fold Changes
+```{r}
+Fold_Change_DMSO_Data <- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(Fold_Change_02, 
+           Fold_Change_20,
+           Fold_Change_40,
+          key="Treatment", value="Fold_Change_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_Change_") %>%   
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, Fold_Change_vs_Control)
+```
+
+Gather P-values and make data frame with only P-Values
+```{r}
+p_value_DMSO_Data<- Untidy_DMSO_Data %>% 
+   
+   #Gathers 3 columns 
+   gather(p_val_02, 
+          p_val_20, 
+          p_val_40,
+          key="Treatment", value="p_value_vs_Control") %>% 
+  
+   #deletes part of unwanted text in data
+   separate(Treatment, into= c("Delete", "Treatment"), sep = "_val_") %>%   
+   # selects 3 "key" columns, treatment, and intensity
+   select(Region, ID, Chemical_Name, Treatment, p_value_vs_Control)
+```
+
+Join!: join treatment and Fold Change, and p_val
+```{r}
+Tidy_DMSO_Data <- left_join(Intensity_DMSO_Data, Fold_Change_DMSO_Data)
+            
+Tidy_DMSO_Data <- left_join(Tidy_DMSO_Data, p_value_DMSO_Data)
+```
+
+Subsets:
+
+```{r}
+Chems_in_OneCMetabolism <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "S-Lactoylglutathione" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-")
+Chems_in_OneCMetabolism
+```
+
+```{r}
+Chems_in_Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Chems_in_Nucleotides
+```
+
+Significant p-val is 0.05, significant fold change = 2
+```{r}
+DMSO_Data_Sig_Foldchange_AND_pval <- Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control, 
+         p_value_vs_Control, 
+         Mean_Intensity, 
+         Treatment) %>% 
+  filter(Fold_Change_vs_Control >= 2.0 & p_value_vs_Control <= 0.05)
+```
+
+Data Exploration: How many compunds have a sig. p-val, at any dose, in each region
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         p_value_vs_Control) %>% 
+  filter(p_value_vs_Control <= 0.05) %>% 
+  count(Region)
+```
+
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control) %>% 
+  filter(Fold_Change_vs_Control >= 2.0) %>% 
+  count(Region)
+```
+
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control, 
+         p_value_vs_Control) %>% 
+  filter(Fold_Change_vs_Control >= 2.0 & p_value_vs_Control <= 0.05) %>% 
+  count(Region)
+```
+
+Blood Flow Near regions: First by Cortex, Cerebellum, Basal Ganglia, Hippocampus
+```{r}
+Significant_and_foldchange_Data %>% 
+  ggplot(aes(x= Region, fill=Region))+
+  geom_bar()+
+  theme_dark(base_family = "Avenir")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  labs(title = "Number of Significant Metabolites by Region ",
+       x = "Region of Brain",
+       y = "Number of Metabolites")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_fill_brewer(palette = "PuRd")
+```
+
+```{r}
+Chems_in_OneCMetabolism %>% 
+  ggplot(aes(x=Treatment, y=Chemical_Name))+
+  theme_classic(base_family = "Avenir")+
+  geom_tile(aes(fill= Mean_Intensity), color="grey")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust=1))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in One Carbon Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Nucleotides
+```
+
+```{r} 
+Chems_in_Nucleotides %>% 
+ggplot(aes(x=Treatment, y=Chemical_Name))+
+  geom_tile(aes(fill=Mean_Intensity), color="white")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 60, hjust=1), 
+        plot.title = element_text(hjust = 0.5))+
+  coord_fixed()+ #maintains aspect ratio so 1 unit on x is 1 unit on y
+  labs(title = "Variation in Nucleotide Metabolites by Treatment ",
+       x = "Treatment",
+       y = "Metabolite")+
+scale_fill_gradientn(colours = terrain.colors(19))
+```
+
+```{r}
+OneCMetabolism %>% 
+  filter( Region == "Cortex" | Region == "Hippocampus") %>% 
+  filter(Treatment == "02" | Treatment == "20" | Treatment== "40") %>% 
+  ggplot(aes(x=Chemical_Name, y=Fold_Change_vs_Control, fill=Treatment))+
+  theme_dark(base_family = "Avenir")+
+  theme(legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, hjust=1), 
+      plot.title = element_text(hjust = 0.5))+
+  labs(title = "Fold Change by Region for One Carbon Metabolites ",
+        x = "Metabolite", 
+        y = "Fold Change")+
+  geom_col(position = "dodge") +
+  facet_wrap(~Region)+
+  coord_flip()+
+  scale_fill_brewer(palette = "PuRd")+
+  ylim(0,15)
+```
+
+```{r}
+Chems_in_Nucleotides%>% 
+  filter(p_value_vs_Control < 0.005 & Fold_Change_vs_Control > 2.0)%>%
+  ggplot(aes(x=Chemical_Name, y=1/p_value_vs_Control, fill=Treatment))+
+  geom_col(position = "dodge") +
+  facet_wrap(~Region)+
+    theme_dark(base_family = "Avenir")+
+    scale_fill_brewer(palette="PuRd")+
+      theme(axis.text.x = element_text(angle = 45, hjust=1), 
+            plot.title = element_text(hjust = 0.5))+
+  labs(title = "Fold Change of Sig. Alttered Nucleotides by Treatment and Region ",
+        x = "Metabolite", 
+        y = "(1/p-value)")
+```
+
+
+```{r}
+Chems_in_OneCMetabolism %>%
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-") %>% 
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+    facet_wrap(~Chemical_Name)+
+    theme(axis.text.x = element_text(angle = 60, hjust=1),
+    plot.title = element_text(hjust = 0.5))+
+    labs(title = "Mean Intensity of Metabolite Signal ",
+        x = "Treatment", 
+        y = "Mean Intensity")
+```
+
+Looking at the relationship between SAM and SAH is a common indicator on where the equalibrium lays and is idiciative of the activity of the metabolomic pathway
+```{r}
+Chems_in_OneCMetabolism %>%
+    filter(Chemical_Name== "S-Adenosyl-homocysteine" |
+           Chemical_Name== "S-Adenosyl-methionine") %>% 
+    ggplot(aes(x = Treatment, y = Mean_Intensity, fill = Region))+
+    geom_bar(stat = "identity")+
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+    theme_dark()+
+    scale_fill_brewer(palette="PuRd")+
+    facet_grid(~Chemical_Name)
+```
