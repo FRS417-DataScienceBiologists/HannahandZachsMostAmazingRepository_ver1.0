@@ -2,7 +2,9 @@
 title: "DMSO_Project_Data_Tidying"
 author: "Hannah Houts"
 date: "March 1, 2019"
-output: html_document
+output: 
+  html_document:
+    keep_md: yes
 ---
 
 Load Libraries
@@ -10,6 +12,9 @@ Load Libraries
 library(tidyverse)
 library(ggplot2)
 ```
+
+
+
 
 
 Load Data & Rename Columns 
@@ -38,7 +43,6 @@ Original_DMSO_Data <- Untidy_DMSO_Data
 
 
 
-
 Gather Intensities and make data frame with only intensities
 ```{r}
           
@@ -59,6 +63,9 @@ Intensity_DMSO_Data<- Untidy_DMSO_Data %>%
 ```
 
 
+
+
+
 Gather Fold Changes and make data frame with only Fold Changes
 ```{r}
           
@@ -77,6 +84,10 @@ Fold_Change_DMSO_Data <- Untidy_DMSO_Data %>%
    select(Region, ID, Chemical_Name, Treatment, Fold_Change_vs_Control)
 
 ```
+
+
+
+
 
 Gather P-values and make data frame with only P-Values
 ```{r}
@@ -99,6 +110,7 @@ p_value_DMSO_Data<- Untidy_DMSO_Data %>%
 
 
   
+
   
 Join!: join treatment and Fold Change, and p_val
 ```{r}
@@ -109,3 +121,63 @@ Tidy_DMSO_Data <- left_join(Tidy_DMSO_Data, p_value_DMSO_Data)
 
 
 ```
+
+
+
+
+
+Subsets:
+
+```{r}
+Chems_in_OneCMetabolism <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "Cystathionine" |
+        Chemical_Name== "DL-Cystathionine" |
+        Chemical_Name== "S-Adenosyl-homocysteine" |
+        Chemical_Name== "S-Adenosyl-methionine" |
+        Chemical_Name== "S-Lactoylglutathione" |
+        Chemical_Name== "Glutathione-oxidized" |
+        Chemical_Name== "Glutathione-reduceD-")
+OneCMetabolism
+```
+
+```{r}
+Chems_in_Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Chems_in_Nucleotides
+```
+
+
+

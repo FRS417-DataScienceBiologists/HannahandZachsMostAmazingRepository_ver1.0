@@ -1,0 +1,138 @@
+---
+title: "DMSO_Project_Data_Tidying"
+author: "Hannah Houts"
+date: "March 1, 2019"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+
+
+```{r}
+library(tidyverse)
+library(ggthemr)
+library(devtools)
+#ggthemr('pale')
+#options(scipen = 999)
+```
+
+Data Exploration: How many compunds have a sig. p-val, at any dose, in each region
+
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         p_value_vs_Control) %>% 
+  filter(p_value_vs_Control <= 0.05) %>% 
+  count(Region)
+```
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control) %>% 
+  filter(Fold_Change_vs_Control >= 2.0) %>% 
+  count(Region)
+```
+```{r}
+Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control, 
+         p_value_vs_Control) %>% 
+  filter(Fold_Change_vs_Control >= 2.0 & p_value_vs_Control <= 0.05) %>% 
+  count(Region)
+```
+
+Significant p-val is 0.05, significant fold change = 2
+```{r}
+DMSO_Data_Sig_Foldchange_AND_pval <- Tidy_DMSO_Data %>% 
+  select(Chemical_Name, 
+         Region, 
+         Fold_Change_vs_Control, 
+         p_value_vs_Control, 
+         Mean_Intensity, 
+         Treatment) %>% 
+  filter(Fold_Change_vs_Control >= 2.0 & p_value_vs_Control <= 0.05)
+```
+
+Blood Flow Near regions: First by Cortex, Cerebellum, Basal Ganglia, Hippocampus
+```{r}
+Significant_and_foldchange_Data %>% 
+  ggplot(aes(x= Region, fill=Region))+
+  geom_bar(alpha=0.9, na.rm=T, position="dodge")+
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 60, hjust=1))
+```
+
+
+
+
+```{r}
+OneCMetabolism %>% 
+  ggplot(aes(x=Treatment, y=Chemical_Name))+
+  geom_tile(aes(fill=Mean_Intensity), color="white")
+```
+
+```{r}
+Nucleotides <- 
+  Tidy_DMSO_Data %>% 
+  filter(Chemical_Name== "5-Methylcytidine" |
+        Chemical_Name== "5-Methylcytosine" |
+        Chemical_Name== "7-Methylguanine" |
+        Chemical_Name== "7-Methylguanosine" |
+        Chemical_Name== "Adenine" |
+        Chemical_Name== "Adenosine" |
+        Chemical_Name== "Adenosine-3-monophosphate" |
+        Chemical_Name== "beta-Nicotinamide-adenine-dinucleotide" |
+        Chemical_Name== "Guanine" |
+        Chemical_Name== "Guanosine" |
+        Chemical_Name== "Guanosine-5-tetraphosphate" |
+        Chemical_Name== "Cytidine" |
+        Chemical_Name== "Cytidine-5-diphosphate-ethanolamine" |
+        Chemical_Name== "METHYLGUANIDINE" |
+        Chemical_Name== "2-Methylguanosine" |
+        Chemical_Name== "Nicotinamide-riboside-cation" |
+        Chemical_Name== "Thymine" |
+        Chemical_Name== "UMP" |
+        Chemical_Name== "3-Methylcytidine" |
+        Chemical_Name== "2-Deoxycytidine" |
+        Chemical_Name== "2-O-Methylcytidine" |
+        Chemical_Name== "3-O-Methylcytidine" |
+        Chemical_Name== "Uracil" |
+        Chemical_Name== "Uridine" |
+        Chemical_Name== "1-Methyladenosine" |
+        Chemical_Name== "Xanthine" |
+        Chemical_Name== "Xanthosine-5-monophosphate" |
+        Chemical_Name== "Inosine" |
+        Chemical_Name== "Inosine-5-monophosphate" |
+        Chemical_Name== "5-Methylthioadenosine" |
+        Chemical_Name== "5-S-Methyl-5-thioadenosine" |
+        Chemical_Name== "Uridine-5-diphosphoacetylglucosamine" )
+Nucleotides
+```
+
+```{r} 
+Chems_in_Nucleotides %>% 
+ggplot(aes(x=Treatment, y=Chemical_Name))+
+  geom_tile(aes(fill=Mean_Intensity), color="white")
+```
+
+```{r}
+OneCMetabolism %>% 
+  ggplot(aes(x=Chemical_Name, y=Fold_Change_vs_Control, fill=Treatment))+
+   scale_y_log10()+
+  rotate_x_text(45)+
+ geom_col(position = "dodge") +
+  facet_wrap(~Region)
+```
+
+```{r}
+Tidy_DMSO_Data %>% 
+  ggplot(aes(x=Mean_Intensity, y=Fold_Change_vs_Control, color=Region))+
+  scale_x_log10()+
+  geom_point()
+
+```
+
